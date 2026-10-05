@@ -6,7 +6,7 @@ import notesRoutes from "./routes/notes.js";
 import path from "path";
 dotenv.config();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 
@@ -18,14 +18,14 @@ app.use("/api/notes", notesRoutes);
 const __dirname = path.resolve();
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../Frontend/mern-note-app/dist")));
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
   app.get("/{*splat}", (req, res) => {
-    res.sendFile(path.join(__dirname, "../Frontend/mern-note-app/dist/index.html"));
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
   });
 }
 
 connectDB();
 
 app.listen(PORT, () => {
-  console.log(`server started at port http://localhost:${PORT}`);
+  console.log(`Server started at port ${PORT}`);
 });
