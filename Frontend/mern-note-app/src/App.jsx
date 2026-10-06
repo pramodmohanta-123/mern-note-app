@@ -12,41 +12,94 @@ function App() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+
+      // No token means user is not logged in
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
         const { data } = await axios.get("/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
+
+        // Token is valid, so store user
         setUser(data);
-      } catch (err) {
+      } catch (error) {
+        // Token is invalid or expired
         localStorage.removeItem("token");
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, []);
+
+  // Show loading screen while checking login
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-xl text-white">Loading...</div>
+        <div className="text-xl text-white">
+          Loading...
+        </div>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gray-500">
       <Navbar user={user} setUser={setUser} />
+
       <Routes>
+        {/* Login Page */}
         <Route
           path="/login"
-          element={user ? <Navigate to="/" /> : <Login setUser={setUser} />}
+          element={
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login setUser={setUser} />
+            )
+          }
         />
+
+        {/* Register Page */}
         <Route
           path="/register"
-          element={user ? <Navigate to="/" /> : <Register setUser={setUser} />}
+          element={
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Register />
+            )
+          }
         />
-        <Route path="/" element={user ? <Home /> : <Navigate to="/login" />} />
+
+        {/* Home / Notes Page */}
+        <Route
+          path="/"
+          element={
+            user ? (
+              <Home />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* Unknown URL */}
+        <Route
+          path="*"
+          element={
+            <Navigate to={user ? "/" : "/login"} replace />
+          }
+        />
       </Routes>
     </div>
   );
